@@ -7,6 +7,12 @@
 
 echo "Iniciando script de configuración..."
 
+# --- Bloque 0: Variables de entorno ---
+if [ ! -f Project/.env ]; then
+  echo "Creando Project/.env a partir de Project/.env.example (cambia los valores antes de usarlo en serio)..."
+  cp Project/.env.example Project/.env
+fi
+
 # --- Bloque 1: Instalación de Dependencias ---
 echo "Instalando dependencias (pip3 install -r project/requirements.txt)..."
 pip3 install -r project/requirements.txt

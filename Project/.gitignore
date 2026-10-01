@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Variables de entorno locales (credenciales)
+.env
+
 # Virtual environments
 venv/
 env/

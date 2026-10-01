@@ -7,6 +7,12 @@ REM --------------------------------------------------
 
 echo "Iniciando script de configuracion..."
 
+REM --- Bloque 0: Variables de entorno ---
+IF NOT EXIST Project\.env (
+    echo "Creando Project\.env a partir de Project\.env.example..."
+    copy Project\.env.example Project\.env
+)
+
 REM --- Bloque 1: Instalación de Dependencias ---
 REM Se instalan las dependencias desde la carpeta /project/
 echo "Instalando dependencias (py -m pip install -r project/requirements.txt)..."

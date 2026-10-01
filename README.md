@@ -16,7 +16,7 @@ Repositorio del proyecto de Ingeniería de Software 1. Se trata de una aplicaci�
 
 - Python 3.11 o superior y `pip`.
 - Entorno virtual opcional (`python -m venv .venv`).
-- Docker + Docker Compose si quieres levantar PostgreSQL con el `docker-compose.yml` incluido, o bien una instancia local de PostgreSQL 15 con las credenciales `midb` / `miuser` / `mipass`.
+- Docker + Docker Compose si quieres levantar PostgreSQL con el `docker-compose.yml` incluido, o bien una instancia local de PostgreSQL 15.
 - Git (solo para clonar) y make opcional.
 
 ## Puesta en marcha rápida
@@ -31,25 +31,34 @@ Repositorio del proyecto de Ingeniería de Software 1. Se trata de una aplicaci�
    ```bash
    pip install -r Project/requirements.txt
    ```
-3. Iniciar PostgreSQL con Docker 
+3. Configurar las variables de entorno. Las credenciales y la `SECRET_KEY` no están en el código: se leen de `Project/.env`, que está en `.gitignore`.
+   ```bash
+   cp Project/.env.example Project/.env
+   # En Windows: copy Project\.env.example Project\.env
+   ```
+   Edita `Project/.env` y cambia `DJANGO_SECRET_KEY` y `POSTGRES_PASSWORD`. Para generar una clave:
+   ```bash
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+4. Iniciar PostgreSQL con Docker (toma las credenciales del mismo `Project/.env`).
    ```bash
    cd Project
    docker compose up -d
    ```
-   Si ya tienes PostgreSQL, ajusta los datos de conexión en `Project/Project/settings.py`.
-4. Aplicar migraciones y crear un superusuario para el panel de administración.
+   Si ya tienes PostgreSQL, ajusta las variables `POSTGRES_*` en `Project/.env`.
+5. Aplicar migraciones y crear un superusuario para el panel de administración.
    ```bash
    cd Project
    python manage.py migrate
    python manage.py createsuperuser
    ```
-5. (Opcional) Cargar datos de ejemplo.
+6. (Opcional) Cargar datos de ejemplo.
    ```bash
    cd ..
    python create_test_data.py
    ```
    Este script genera un socio con usuario, planes, rutinas y mediciones para que puedas navegar la interfaz sin registrar nada manualmente.
-6. Ejecutar la aplicación.
+7. Ejecutar la aplicación.
    ```bash
    cd Project
    python manage.py runserver

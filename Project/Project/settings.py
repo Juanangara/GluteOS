@@ -1,19 +1,47 @@
+import os
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _cargar_env(ruta):
+    """Carga variables KEY=VALUE desde un archivo .env, sin dependencias externas.
+    Las variables ya definidas en el entorno tienen prioridad."""
+    if not ruta.exists():
+        return
+    for linea in ruta.read_text(encoding="utf-8").splitlines():
+        linea = linea.strip()
+        if not linea or linea.startswith("#") or "=" not in linea:
+            continue
+        clave, valor = linea.split("=", 1)
+        os.environ.setdefault(clave.strip(), valor.strip().strip('"').strip("'"))
+
+
+def _env(nombre, por_defecto=None):
+    valor = os.environ.get(nombre, por_defecto)
+    if valor is None:
+        raise ImproperlyConfigured(
+            f"Falta la variable de entorno {nombre}. Copia Project/.env.example a Project/.env."
+        )
+    return valor
+
+
+_cargar_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z+6x6qt+uk(2(-m42u28v-i%l7&v^g-n_utb*r51)+hs+=3#-i'
+SECRET_KEY = _env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = _env("DJANGO_DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h.strip() for h in _env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
 
 
 # Application definition
@@ -73,11 +101,11 @@ WSGI_APPLICATION = 'Project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'midb',           
-        'USER': 'miuser',         
-        'PASSWORD': 'mipass',       
-        'HOST': 'localhost',      
-        'PORT': '5432',           
+        'NAME': _env('POSTGRES_DB'),
+        'USER': _env('POSTGRES_USER'),
+        'PASSWORD': _env('POSTGRES_PASSWORD'),
+        'HOST': _env('POSTGRES_HOST', 'localhost'),
+        'PORT': _env('POSTGRES_PORT', '5432'),
     }
 }
 
